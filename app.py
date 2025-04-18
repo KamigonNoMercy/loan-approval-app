@@ -1,16 +1,15 @@
 import streamlit as st
 import pandas as pd
-import pickle
+import joblib
 
 st.set_page_config(page_title="Loan Approval Predictor", layout="centered")
 st.title("🏦 Loan Approval Prediction App")
 st.write("Masukkan data peminjam untuk memprediksi apakah pinjaman akan disetujui atau tidak.")
 
-# Load model
+# Load model dengan joblib
 @st.cache_resource
 def load_model():
-    with open("best_model.pkl", "rb") as f:
-        return pickle.load(f)
+    return joblib.load("best_model.pkl")
 
 model_bundle = load_model()
 model = model_bundle['model']
@@ -18,7 +17,7 @@ scaler = model_bundle['scaler']
 scale_cols = model_bundle['scale_cols']
 features = model_bundle['features']
 
-# Input form
+# Form Input
 with st.form("loan_form"):
     col1, col2 = st.columns(2)
     
@@ -53,6 +52,7 @@ with st.form("loan_form"):
 
 # Prediksi
 if submitted:
+    # Buat input DataFrame
     df_input = pd.DataFrame([{
         'person_age': person_age,
         'person_income_win': person_income,
@@ -65,31 +65,31 @@ if submitted:
         'person_gender': 1 if person_gender == "Laki-laki" else 0,
         'previous_loan_defaults_on_file': 1 if prev_default == "Ya" else 0,
 
-        # One-hot encode single education level
+        # One-hot encoded: Pendidikan
         'person_education_Bachelor': 1 if edu_level == "Bachelor" else 0,
         'person_education_Master': 1 if edu_level == "Master" else 0,
         'person_education_Doctorate': 1 if edu_level == "Doctorate" else 0,
         'person_education_High School': 1 if edu_level == "High School" else 0,
 
-        # One-hot encode home status
+        # One-hot encoded: Tempat Tinggal
         'person_home_ownership_OWN': 1 if home_status == "OWN" else 0,
         'person_home_ownership_RENT': 1 if home_status == "RENT" else 0,
         'person_home_ownership_OTHER': 1 if home_status == "OTHER" else 0,
 
-        # One-hot encode loan intent
+        # One-hot encoded: Tujuan Pinjaman
         'loan_intent_EDUCATION': 1 if loan_intent == "EDUCATION" else 0,
         'loan_intent_HOMEIMPROVEMENT': 1 if loan_intent == "HOMEIMPROVEMENT" else 0,
         'loan_intent_MEDICAL': 1 if loan_intent == "MEDICAL" else 0,
         'loan_intent_PERSONAL': 1 if loan_intent == "PERSONAL" else 0,
-        'loan_intent_VENTURE': 1 if loan_intent == "VENTURE" else 0
+        'loan_intent_VENTURE': 1 if loan_intent == "VENTURE" else 0,
     }])
 
-    # Tambahkan kolom hilang jika ada
-    for col in (set(features) - set(df_input.columns)):
+    # Lengkapi kolom jika ada yang kurang
+    for col in set(features) - set(df_input.columns):
         df_input[col] = 0
     df_input = df_input[features]
 
-    # Scaling
+    # Scaling hanya kolom yang perlu
     df_scaled = pd.concat([
         pd.DataFrame(scaler.transform(df_input[scale_cols]), columns=scale_cols),
         df_input.drop(columns=scale_cols).reset_index(drop=True)
@@ -107,6 +107,7 @@ if submitted:
             st.success(f"{emoji} {label} (Probabilitas: {probability:.2%})")
         else:
             st.error(f"{emoji} {label} (Probabilitas: {probability:.2%})")
+
     except Exception as e:
         st.error("Terjadi kesalahan saat menampilkan hasil.")
         st.code(str(e))
