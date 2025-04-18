@@ -10,8 +10,7 @@ st.write("Masukkan data peminjam untuk memprediksi apakah pinjaman akan disetuju
 @st.cache_resource
 def load_model():
     with open("best_model.pkl", "rb") as f:
-        model_bundle = pickle.load(f)
-    return model_bundle
+        return pickle.load(f)
 
 model_bundle = load_model()
 model = model_bundle['model']
@@ -31,7 +30,6 @@ with st.form("loan_form"):
         loan_int_rate = st.number_input("Suku Bunga (%)", 5.0, 30.0, 12.5)
 
     with col2:
-        # Tambahkan field manual loan_percent_income agar bisa dikoreksi
         default_percent = round(loan_amnt / max(person_income, 1), 2)
         loan_percent_income = st.number_input(
             "Proporsi Pinjaman terhadap Pendapatan",
@@ -43,22 +41,13 @@ with st.form("loan_form"):
         prev_default = st.radio("Pernah Gagal Bayar?", ["Ya", "Tidak"])
 
     st.markdown("### Kategori Pendidikan")
-    edu_bachelor = st.checkbox("Bachelor")
-    edu_master = st.checkbox("Master")
-    edu_doctorate = st.checkbox("Doctorate")
-    edu_highschool = st.checkbox("High School")
+    edu_level = st.selectbox("Pilih Salah Satu", ["Bachelor", "Master", "Doctorate", "High School"])
 
     st.markdown("### Status Tempat Tinggal")
-    own_home = st.checkbox("OWN")
-    rent_home = st.checkbox("RENT")
-    other_home = st.checkbox("OTHER")
+    home_status = st.selectbox("Pilih Salah Satu", ["OWN", "RENT", "OTHER"])
 
     st.markdown("### Tujuan Pinjaman")
-    loan_education = st.checkbox("EDUCATION")
-    loan_home = st.checkbox("HOMEIMPROVEMENT")
-    loan_medical = st.checkbox("MEDICAL")
-    loan_personal = st.checkbox("PERSONAL")
-    loan_venture = st.checkbox("VENTURE")
+    loan_intent = st.selectbox("Pilih Salah Satu", ["EDUCATION", "HOMEIMPROVEMENT", "MEDICAL", "PERSONAL", "VENTURE"])
 
     submitted = st.form_submit_button("Prediksi")
 
@@ -75,27 +64,32 @@ if submitted:
         'credit_score': credit_score,
         'person_gender': 1 if person_gender == "Laki-laki" else 0,
         'previous_loan_defaults_on_file': 1 if prev_default == "Ya" else 0,
-        'person_education_Bachelor': edu_bachelor,
-        'person_education_Doctorate': edu_doctorate,
-        'person_education_High School': edu_highschool,
-        'person_education_Master': edu_master,
-        'person_home_ownership_OTHER': other_home,
-        'person_home_ownership_OWN': own_home,
-        'person_home_ownership_RENT': rent_home,
-        'loan_intent_EDUCATION': loan_education,
-        'loan_intent_HOMEIMPROVEMENT': loan_home,
-        'loan_intent_MEDICAL': loan_medical,
-        'loan_intent_PERSONAL': loan_personal,
-        'loan_intent_VENTURE': loan_venture
+
+        # One-hot encode single education level
+        'person_education_Bachelor': 1 if edu_level == "Bachelor" else 0,
+        'person_education_Master': 1 if edu_level == "Master" else 0,
+        'person_education_Doctorate': 1 if edu_level == "Doctorate" else 0,
+        'person_education_High School': 1 if edu_level == "High School" else 0,
+
+        # One-hot encode home status
+        'person_home_ownership_OWN': 1 if home_status == "OWN" else 0,
+        'person_home_ownership_RENT': 1 if home_status == "RENT" else 0,
+        'person_home_ownership_OTHER': 1 if home_status == "OTHER" else 0,
+
+        # One-hot encode loan intent
+        'loan_intent_EDUCATION': 1 if loan_intent == "EDUCATION" else 0,
+        'loan_intent_HOMEIMPROVEMENT': 1 if loan_intent == "HOMEIMPROVEMENT" else 0,
+        'loan_intent_MEDICAL': 1 if loan_intent == "MEDICAL" else 0,
+        'loan_intent_PERSONAL': 1 if loan_intent == "PERSONAL" else 0,
+        'loan_intent_VENTURE': 1 if loan_intent == "VENTURE" else 0
     }])
 
-    # Tambahkan kolom yang hilang (jaga-jaga)
-    missing_cols = set(features) - set(df_input.columns)
-    for col in missing_cols:
+    # Tambahkan kolom hilang jika ada
+    for col in (set(features) - set(df_input.columns)):
         df_input[col] = 0
     df_input = df_input[features]
 
-    # Scaling hanya kolom yang perlu
+    # Scaling
     df_scaled = pd.concat([
         pd.DataFrame(scaler.transform(df_input[scale_cols]), columns=scale_cols),
         df_input.drop(columns=scale_cols).reset_index(drop=True)
