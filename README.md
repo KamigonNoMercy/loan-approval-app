@@ -41,8 +41,6 @@ loan-approval-app/
 ├─ README.md # this file
 ├─ .gitignore
 ├─ LICENSE (MIT)
-└─ .streamlit/
-└─ config.toml # optional theme settings
 ```
 
 ---
