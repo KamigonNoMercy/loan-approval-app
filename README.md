@@ -15,6 +15,8 @@ and deployed as an interactive **Streamlit** app.
 ---
 
 ## 📦 Repository Layout
+```
+loan-approval-app/
 ├─ app/
 │ ├─ app.py # Streamlit UI (uses model .pkl)
 │ └─ best_model.pkl # trained model bundle
@@ -27,8 +29,8 @@ and deployed as an interactive **Streamlit** app.
 ├─ .gitignore
 ├─ LICENSE (MIT)
 └─ .streamlit/
-└─ config.toml (optional theme settings)
-
+└─ config.toml # optional theme settings
+```
 
 ---
 
