@@ -14,6 +14,19 @@ and deployed as an interactive **Streamlit** app.
 
 ---
 
+## 🚀 Demo
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://loan-approval-apps.streamlit.app)  
+
+🔗 **Try the app here:**  
+👉 [https://loan-approval-apps.streamlit.app](https://loan-approval-apps.streamlit.app)
+
+---
+
+## 📂 Dataset
+The dataset used for training is available here:  
+👉 [Loan Dataset (Google Drive)](https://drive.google.com/file/d/1GT-dhOf5cWgq74kHgEZk1HLpfVuihn7P/view?usp=sharing)
+
+
 ## 📦 Repository Layout
 ```
 loan-approval-app/
