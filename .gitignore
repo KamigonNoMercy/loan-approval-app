@@ -1,0 +1,40 @@
+# Python cache & compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pkl
+
+# Virtual environment
+venv/
+.env/
+.venv/
+
+# Streamlit & cache
+.streamlit/secrets.toml
+.streamlit/logs/
+.streamlit/cache/
+.streamlit/config.toml
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Dataset (jangan upload data asli ke GitHub)
+*.csv
+*.xlsx
+*.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Model weights (kalau ukurannya besar, simpan di HF/Kaggle, bukan GitHub)
+*.h5
+*.pt
+*.onnx
+
+# Logs & temporary
+*.log
+logs/
+tmp/
+outputs/
